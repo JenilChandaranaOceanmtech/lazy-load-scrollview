@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
 
@@ -47,8 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // Add in an artificial delay
     await new Future.delayed(const Duration(seconds: 2));
 
-    verticalData.addAll(
-        List.generate(increment, (index) => verticalData.length + index));
+    verticalData.addAll(List.generate(increment, (index) => verticalData.length + index));
 
     setState(() {
       isLoadingVertical = false;
@@ -63,14 +64,14 @@ class _MyHomePageState extends State<MyHomePage> {
     // Add in an artificial delay
     await new Future.delayed(const Duration(seconds: 2));
 
-    horizontalData.addAll(
-        List.generate(increment, (index) => horizontalData.length + index));
+    horizontalData.addAll(List.generate(increment, (index) => horizontalData.length + index));
 
     setState(() {
       isLoadingHorizontal = false;
     });
   }
 
+  bool check = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -79,7 +80,14 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: LazyLoadScrollView(
         isLoading: isLoadingVertical,
-        onEndOfPage: () => _loadMoreVertical(),
+        onEndOfPage: () {
+          _loadMoreVertical();
+          check = true;
+          Timer(Duration(seconds: 1), () {
+            check = false;
+          });
+        },
+        showLoadingAtBottom: check,
         child: Scrollbar(
           child: ListView(
             children: [
@@ -90,19 +98,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   textAlign: TextAlign.center,
                 ),
               ),
-              Container(
-                  height: 180,
-                  child: LazyLoadScrollView(
-                      isLoading: isLoadingHorizontal,
-                      scrollDirection: Axis.horizontal,
-                      onEndOfPage: () => _loadMoreHorizontal(),
-                      child: Scrollbar(
-                          child: ListView.builder(
-                              itemCount: horizontalData.length,
-                              scrollDirection: Axis.horizontal,
-                              itemBuilder: (context, position) {
-                                return DemoItem(position);
-                              })))),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
@@ -157,7 +152,7 @@ class DemoItem extends StatelessWidget {
                 ],
               ),
               Text(
-                  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque sed vulputate orci. Proin id scelerisque velit. Fusce at ligula ligula. Donec fringilla sapien odio, et faucibus tortor finibus sed. Aenean rutrum ipsum in sagittis auctor. Pellentesque mattis luctus consequat. Sed eget sapien ut nibh rhoncus cursus. Donec eget nisl aliquam, ornare sapien sit amet, lacinia quam."),
+                  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque sed vulputate orci. Proin id scelerisque velit. Fusornare sapien sit amet, lacinia quam."),
             ],
           ),
         ),

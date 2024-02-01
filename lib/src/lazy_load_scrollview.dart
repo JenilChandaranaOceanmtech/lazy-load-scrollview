@@ -1,6 +1,6 @@
 library lazy_load_scrollview;
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 enum LoadingStatus { LOADING, STABLE }
 
@@ -24,6 +24,8 @@ class LazyLoadScrollView extends StatefulWidget {
 
   /// Prevented update nested listview with other axis direction
   final Axis scrollDirection;
+  final bool? showLoadingAtBottom;
+  final Widget? loader;
 
   @override
   State<StatefulWidget> createState() => LazyLoadScrollViewState();
@@ -34,6 +36,8 @@ class LazyLoadScrollView extends StatefulWidget {
     required this.onEndOfPage,
     this.scrollDirection = Axis.vertical,
     this.isLoading = false,
+    this.showLoadingAtBottom,
+    this.loader,
     this.scrollOffset = 100,
   }) : super(key: key);
 }
@@ -52,7 +56,20 @@ class LazyLoadScrollViewState extends State<LazyLoadScrollView> {
   @override
   Widget build(BuildContext context) {
     return NotificationListener<ScrollNotification>(
-      child: widget.child,
+      child: Column(
+        children: [
+          Expanded(child: widget.child),
+          widget.showLoadingAtBottom == true
+              ? widget.loader ??
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10),
+                    child: CircularProgressIndicator(
+                      color: Color(0xff4392F1),
+                    ),
+                  )
+              : const SizedBox.shrink(),
+        ],
+      ),
       onNotification: (notification) => _onNotification(notification, context),
     );
   }
@@ -60,11 +77,8 @@ class LazyLoadScrollViewState extends State<LazyLoadScrollView> {
   bool _onNotification(ScrollNotification notification, BuildContext context) {
     if (widget.scrollDirection == notification.metrics.axis) {
       if (notification is ScrollUpdateNotification) {
-        if (notification.metrics.maxScrollExtent >
-                notification.metrics.pixels &&
-            notification.metrics.maxScrollExtent -
-                    notification.metrics.pixels <=
-                widget.scrollOffset) {
+        if (notification.metrics.maxScrollExtent > notification.metrics.pixels &&
+            notification.metrics.maxScrollExtent - notification.metrics.pixels <= widget.scrollOffset) {
           _loadMore();
         }
         return true;
